@@ -1,5 +1,5 @@
 module.exports = {
-  baseUrl: process.env.BASE_URL || 'http://localhost:3000',
+  baseUrl: process.env.BASE_URL || 'https://142.93.63.5',
   hostEmail: process.env.HOST_EMAIL,
   // hostEmail: 'CVR PORTAL n.athekame@gmail.com',
   dbUser: process.env.DB_USER || 'pmauser',
