@@ -14,9 +14,9 @@ const { hostEmail } = config;
 
 // const hostUrl = process.env.HOST_URL;
 
-const hostUrl = 'http://localhost:5000';
+const hostUrl = 'https://142.93.63.5';
 
-const hostUrlclient = 'http://localhost:3000';
+const hostUrlclient = 'https://noteefia.com';
 
 const sendEmail = async (res, tempID, data) => {
   let getTemplate;
