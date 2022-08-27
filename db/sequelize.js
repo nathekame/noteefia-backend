@@ -9,7 +9,6 @@ const apiKeysModel = require('./models/apikeys');
 
 const clientsModel = require('./models/clients');
 
-
 const config = require('../config/secret');
 
 const sequelize = new Sequelize('notifiadb', config.dbUser, config.dbPassword, {
