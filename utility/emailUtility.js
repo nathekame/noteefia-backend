@@ -1,55 +1,216 @@
 const Crypto = require('crypto');
+const AWS = require('aws-sdk');
 const sgMail = require('@sendgrid/mail');
 const config = require('../config/secret');
 const sequelize = require('../db/sequelize');
 
 sgMail.setApiKey(config.sendgridKey);
 
-const dftTemplate = require('../templates/dft');
+// const dftTemplate = require('../templates/dft');
 const userUtility = require('./userUtility');
 
-const sendersUtility = require('./sendersUtility');
+// const sendersUtility = require('./sendersUtilitybk');
 
 const { hostEmail } = config;
 
 // const hostUrl = process.env.HOST_URL;
 
-const hostUrl = 'https://142.93.63.5';
+const hostUrl = 'https://54.227.65.41';
 
 const hostUrlclient = 'https://noteefia.com';
 
-const sendEmail = async (res, tempID, data) => {
-  let getTemplate;
+const SES_CONFIG = {
+  accessKeyId: config.accessKeyId,
+  secretAccessKey: config.secretAccessKey,
+  region: 'us-east-1',
+};
 
-  switch (tempID) {
-    case 'dft':
-      getTemplate = await dftTemplate(data.body);
-      break;
-    default:
-      res.type('application/json');
-      return res.status(404).json({ msg: 'Template Not Found' });
-  }
+const AWS_SES = new AWS.SES(SES_CONFIG);
+const saveEmail = async (emData) => {
+  // let getTemplate;
 
-  const msg = {
-    to: { email: data.receiver, name: data.receiver },
-    from: { email: data.sender, name: data.sender },
-    subject: data.subject,
-    // html: getTemplate,
-    html: data.body,
+  // switch (emData.tempID) {
+  //   case 'dft':
+  //     getTemplate = await dftTemplate(emData);
+  //     break;
+  //   default:
+  //     return true;
+  // }
+
+  const data = {
+    clientID: emData.clientID,
+    sender: emData.sender,
+    receiver: emData.receiver,
+    subject: emData.subject,
+    host: emData.dhost,
+    message: emData.body,
+    messageID: emData.messageID,
+    requestID: emData.requestID,
+    statusCode: emData.scode,
   };
 
-  const sendMail = sgMail.send(msg).then(
-    (resp) => resp,
-    (error) => {
-      if (error) {
-        return error;
+  const nEmail = sequelize.Emails.create(data)
+    .then((newEmail) => {
+      if (!newEmail) {
+        return false;
       }
-      return false;
-    },
-  );
 
-  const outPutSend = await sendMail;
-  return outPutSend;
+      if (newEmail) {
+        return newEmail;
+      }
+      return true;
+    })
+    .catch((err) => {
+      throw err;
+    });
+  // next();
+
+  const output = await nEmail;
+  return output;
+};
+
+const awssendEmail = async (res, data) => {
+  const params = {
+    Source: data.sender,
+    Destination: {
+      ToAddresses: [data.receiver],
+    },
+    ReplyToAddresses: [],
+    Message: {
+      Body: {
+        Html: {
+          Charset: 'UTF-8',
+          Data: data.body,
+        },
+      },
+      Subject: {
+        Charset: 'UTF-8',
+        Data: data.subject,
+      },
+    },
+  };
+
+  const sendPromise = AWS_SES.sendEmail(params)
+    .promise()
+    .then((resp) => {
+      // console.log(`THE DATA RETURNED ==> ${JSON.stringify(resp)}`);
+
+      const rtObj = {
+        isErr: false,
+        reqID: resp.ResponseMetadata.RequestId,
+        errMsg: null,
+        messageID: resp.MessageId,
+        statusCode: 201,
+      };
+
+      return rtObj;
+    })
+    .catch(async (err) => {
+      // console.log(`THE ERROR LOG ===> ${JSON.stringify(err)}`);
+      // console.error(err, err.stack);
+
+      const rtObj = {
+        isErr: true,
+        reqID: err.requestId,
+        errMsg: err.message,
+        messageID: null,
+        statusCode: err.statusCode,
+      };
+
+      return rtObj;
+    });
+
+  console.log(`the AWS SEND MAIL ===> ${JSON.stringify(sendPromise)}`);
+
+  return sendPromise;
+};
+
+// const sendEmail = async (res, tempID, data) => {
+//   let getTemplate;
+
+//   switch (tempID) {
+//     case 'dft':
+//       getTemplate = await dftTemplate(data.body);
+//       break;
+//     default:
+//       res.type('application/json');
+//       return res.status(404).json({ msg: 'Template Not Found' });
+//   }
+
+//   const msg = {
+//     to: { email: data.receiver, name: data.receiver },
+//     from: { email: data.sender, name: data.sender },
+//     subject: data.subject,
+//     // html: getTemplate,
+//     html: data.body,
+//   };
+
+//   const sendMail = sgMail.send(msg).then(
+//     (resp) => resp,
+//     (error) => {
+//       if (error) {
+//         return error;
+//       }
+//       return false;
+//     },
+//   );
+
+//   const outPutSend = await sendMail;
+//   return outPutSend;
+// };
+
+const awsresendEmail = async (to, subject, body) => {
+  const params = {
+    Source: hostEmail,
+    Destination: {
+      ToAddresses: [to],
+    },
+    ReplyToAddresses: [],
+    Message: {
+      Body: {
+        Html: {
+          Charset: 'UTF-8',
+          Data: body,
+        },
+      },
+      Subject: {
+        Charset: 'UTF-8',
+        Data: subject,
+      },
+    },
+  };
+  const sendPromise = AWS_SES.sendEmail(params)
+    .promise()
+    .then((resp) => {
+      // console.log(`THE DATA RETURNED ==> ${JSON.stringify(resp)}`);
+
+      const rtObj = {
+        isErr: false,
+        reqID: resp.ResponseMetadata.RequestId,
+        errMsg: null,
+        messageID: resp.MessageId,
+        statusCode: 201,
+      };
+
+      return rtObj;
+    })
+    .catch((err) => {
+      // console.log(`THE ERROR LOG ===> ${JSON.stringify(err)}`);
+      // console.error(err, err.stack);
+      const rtObj = {
+        isErr: true,
+        reqID: err.requestId,
+        errMsg: err.message,
+        messageID: null,
+        statusCode: err.statusCode,
+      };
+
+      return rtObj;
+    });
+
+  console.log(`the AWS SEND MAIL ===> ${JSON.stringify(sendPromise)}`);
+
+  return sendPromise;
 };
 
 const resendEmail = async (to, subject, body) => {
@@ -76,50 +237,6 @@ const resendEmail = async (to, subject, body) => {
 
   const outPutSend = sendMail;
   return outPutSend;
-};
-
-const saveEmail = async (emData) => {
-  let getTemplate;
-
-  switch (emData.tempID) {
-    case 'dft':
-      getTemplate = await dftTemplate(emData);
-      break;
-    default:
-      return true;
-  }
-
-  const data = {
-    uID: emData.uID,
-    sender: emData.sender,
-    receiver: emData.receiver,
-    subject: emData.subject,
-    // message: getTemplate,
-    host: emData.dhost,
-    message: emData.body,
-    emailID: emData.emailID,
-    tempID: emData.tempID,
-    statusCode: emData.scode,
-  };
-
-  const nEmail = sequelize.Emails.create(data)
-    .then((newEmail) => {
-      if (!newEmail) {
-        return false;
-      }
-
-      if (newEmail) {
-        return newEmail;
-      }
-      return true;
-    })
-    .catch((err) => {
-      throw err;
-    });
-  // next();
-
-  const output = await nEmail;
-  return output;
 };
 
 const getAllEmails = async () => {
@@ -352,53 +469,54 @@ const sendVerificationAndPasswordEmail = async (uid, password) => {
   }
 };
 
-const domainSenderVerificationEmail = async (clientID, email) => {
-  const subject = 'Sender Verification Email';
-  const token = Crypto.randomBytes(21).toString('hex').slice(0, 21);
+// const domainSenderVerificationEmail = async (clientID, email) => {
+//   const subject = 'Sender Verification Email';
+//   const token = Crypto.randomBytes(21).toString('hex').slice(0, 21);
 
-  if (token) {
-    const data = {
-      clientID,
-      email,
-      confirmationToken: token,
-      isConfirmed: 0,
-      isBlocked: 0,
-    };
+//   if (token) {
+//     const data = {
+//       clientID,
+//       email,
+//       confirmationToken: token,
+//       isConfirmed: 0,
+//       isBlocked: 0,
+//     };
 
-    const createSender = await sendersUtility.createSender(data);
+//     const createSender = await sendersUtility.createSender(data);
 
-    if (createSender) {
-      const { id } = createSender;
-      const body = `Click on this <a href="${hostUrl}/api/sender_verification_email?id=${id}&token=${token}">Link</a> to verify your email`;
+//     if (createSender) {
+//       const { id } = createSender;
+//       const body = `Click on this <a href="${hostUrl}/api/sender_verification_email?id=${id}&token=${token}">Link</a> to verify your email`;
 
-      const msg = {
-        to: email,
-        from: hostEmail,
-        subject,
-        html: body,
-      };
+//       const msg = {
+//         to: email,
+//         from: hostEmail,
+//         subject,
+//         html: body,
+//       };
 
-      const sendMail = sgMail.send(msg).then(
-        (resp) => true,
-        (error) => {
-          if (error) {
-            return false;
-          }
-        },
-      );
+//       const sendMail = sgMail.send(msg).then(
+//         (resp) => true,
+//         (error) => {
+//           if (error) {
+//             return false;
+//           }
+//         },
+//       );
 
-      const outPutSend = await sendMail;
+//       const outPutSend = await sendMail;
 
-      if (outPutSend) {
-        return outPutSend;
-      }
-    }
-  }
-  return true;
-};
+//       if (outPutSend) {
+//         return outPutSend;
+//       }
+//     }
+//   }
+//   return true;
+// };
 
 module.exports = {
-  sendEmail,
+  awssendEmail,
+  // sendEmail,
   saveEmail,
   getAllEmails,
   getEmail,
@@ -406,9 +524,10 @@ module.exports = {
   getEmailWithclientID,
   getEmailWithEmailID,
   resendEmail,
+  awsresendEmail,
   updateEmail,
   sendVerificationEmail,
   sendPasswordResetEmail,
   sendVerificationAndPasswordEmail,
-  domainSenderVerificationEmail,
+  // domainSenderVerificationEmail,
 };

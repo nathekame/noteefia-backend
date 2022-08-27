@@ -31,11 +31,11 @@ module.exports = (sequelize, type) => {
       type: type.TEXT,
       notEmpty: true,
     },
-    emailID: {
+    messageID: {
       type: type.TEXT,
       notEmpty: true,
     },
-    tempID: {
+    requestID: {
       type: type.TEXT,
       notEmpty: true,
     },

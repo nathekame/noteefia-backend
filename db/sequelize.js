@@ -6,7 +6,6 @@ const usermetaModel = require('./models/usermeta');
 const emailModel = require('./models/emails');
 const smsModel = require('./models/sms');
 const apiKeysModel = require('./models/apikeys');
-const sendersModel = require('./models/senders');
 
 const clientsModel = require('./models/clients');
 
@@ -39,11 +38,10 @@ const Usermeta = usermetaModel(sequelize, Sequelize);
 const Emails = emailModel(sequelize, Sequelize);
 const Sms = smsModel(sequelize, Sequelize);
 const Apikeys = apiKeysModel(sequelize, Sequelize);
-const Senders = sendersModel(sequelize, Sequelize);
 
 const Clients = clientsModel(sequelize, Sequelize);
 
-sequelize.sync({ force: true }).then(() => {
+sequelize.sync({ force: false }).then(() => {
   // console.clear();
   // console.log('Database & tables created Successfully!');
 });
@@ -54,7 +52,6 @@ module.exports = {
   Emails,
   Sms,
   Apikeys,
-  Senders,
 
   Clients,
 };

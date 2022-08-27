@@ -1,7 +1,7 @@
 const emailUtility = require('../utility/emailUtility');
 const clientUtility = require('../utility/clientsUtility');
 const userUtility = require('../utility/userUtility');
-const sendersUtility = require('../utility/sendersUtility');
+// const sendersUtility = require('../utility/sendersUtilitybk');
 const config = require('../config/secret');
 
 const mailGET = async (req, res) => {
@@ -15,21 +15,21 @@ const mailGET = async (req, res) => {
   return true;
 };
 
-const mailPOST = async (req, res) => {
-  const { tempID } = req.body;
+const awsmailPOST = async (req, res) => {
   const { subject } = req.body;
   const { body } = req.body;
   const { receiver } = req.body;
   const { sender } = req.body;
 
-  const checkSender = await sendersUtility.getSenderWITHEMAIL(sender);
+  // check the client
 
-  const keyClientID = Number(res.locals.clientID);
-  const senderClientID = Number(checkSender.clientID);
-  const confirmed = Number(checkSender.isConfirmed);
-  const blocked = Number(checkSender.isBlocked);
+  const cID = Number(res.locals.clientID);
 
-  if (keyClientID === senderClientID && blocked === 0 && confirmed === 1) {
+  const getClient = await clientUtility.getClientWITHID(cID);
+
+  const isBlocked = Number(getClient.isBlocked);
+
+  if (isBlocked === 0) {
     const data = {
       sender,
       receiver,
@@ -37,28 +37,36 @@ const mailPOST = async (req, res) => {
       body,
     };
 
-    const tempid = tempID || 'dft';
-
-    const triggerEmail = await emailUtility.sendEmail(res, tempid, data);
-
+    // send mail at intervals
     setInterval(async () => {
       const getEmails = await emailUtility.getAllEmails();
       const emailRow = getEmails.rows;
 
       const runResend = async (id, rec, sub, mess) => {
-        const resendEmail = await emailUtility.resendEmail(rec, sub, mess);
+        console.log('I AM RESENDING THE EMAIL NOW');
 
-        if (resendEmail[0] !== undefined) {
+        const resendEmail = await emailUtility.awsresendEmail(rec, sub, mess);
+
+        console.log(`THE RESEND OUTPUT ==> ${JSON.stringify(resendEmail)}`);
+        if (!resendEmail.isErr) {
+          // update saved email
+          await emailUtility.updateEmail(id, 'requestID', resendEmail.reqID);
           await emailUtility.updateEmail(
             id,
             'statusCode',
-            resendEmail[0].statusCode
+            resendEmail.statusCode
+          );
+          await emailUtility.updateEmail(
+            id,
+            'messageID',
+            resendEmail.messageID,
           );
         }
       };
 
       if (emailRow !== undefined) {
-        for (let i = 0; i < emailRow.length; i++) {
+        const emailRowLength = emailRow.length;
+        for (let i = 0; i < emailRowLength; i++) {
           const {
             id,
             receiver: rec,
@@ -67,31 +75,41 @@ const mailPOST = async (req, res) => {
             statusCode,
           } = emailRow[i];
 
-          if (statusCode === 500 || statusCode === 503 || statusCode === 429) {
+          if (statusCode === 500 || statusCode === 503) {
             runResend(id, rec, subj, mes);
           }
         }
       }
     }, 60000);
 
-    if (triggerEmail[0] !== undefined) {
-      const scode = triggerEmail[0].statusCode;
-      const emailID = triggerEmail[0].headers['x-message-id'];
+    // send email
 
-      const emData = {
-        clientID: res.locals.clientID,
-        dhost: res.locals.dhost,
-        sender,
-        receiver,
-        subject,
-        body,
-        emailID,
-        tempID: tempID || 'dft',
-        scode,
-      };
+    const triggerEmail = await emailUtility.awssendEmail(res, data);
 
-      const saveEmail = await emailUtility.saveEmail(emData);
-      if (saveEmail) {
+    //  if (triggerEmail) {
+    const emData = {
+      clientID: res.locals.clientID,
+      dhost: res.locals.dhost,
+      sender,
+      receiver,
+      subject,
+      body,
+      messageID: triggerEmail.messageID,
+      requestID: triggerEmail.reqID,
+      scode: triggerEmail.statusCode,
+    };
+
+    // save the email
+
+    const saveEmail = await emailUtility.saveEmail(emData);
+    console.log(`the SAVE EMAIL OUTPUT ==> ${JSON.stringify(saveEmail)}`);
+    if (saveEmail) {
+      if (triggerEmail.isErr) {
+        res.type('application/json');
+        return res.status(triggerEmail.statusCode).json(triggerEmail.errMsg);
+      }
+
+      if (!triggerEmail.isErr) {
         res.type('application/json');
         return res.status(201).json(saveEmail);
       }
@@ -100,6 +118,92 @@ const mailPOST = async (req, res) => {
 
   return true;
 };
+
+// const mailPOST = async (req, res) => {
+//   const { tempID } = req.body;
+//   const { subject } = req.body;
+//   const { body } = req.body;
+//   const { receiver } = req.body;
+//   const { sender } = req.body;
+
+//   const checkSender = await sendersUtility.getSenderWITHEMAIL(sender);
+
+//   const keyClientID = Number(res.locals.clientID);
+//   const senderClientID = Number(checkSender.clientID);
+//   const confirmed = Number(checkSender.isConfirmed);
+//   const blocked = Number(checkSender.isBlocked);
+
+//   if (keyClientID === senderClientID && blocked === 0 && confirmed === 1) {
+//     const data = {
+//       sender,
+//       receiver,
+//       subject,
+//       body,
+//     };
+
+//     const tempid = tempID || 'dft';
+
+//     const triggerEmail = await emailUtility.sendEmail(res, tempid, data);
+
+//     setInterval(async () => {
+//       const getEmails = await emailUtility.getAllEmails();
+//       const emailRow = getEmails.rows;
+
+//       const runResend = async (id, rec, sub, mess) => {
+//         const resendEmail = await emailUtility.resendEmail(rec, sub, mess);
+
+//         if (resendEmail[0] !== undefined) {
+//           await emailUtility.updateEmail(
+//             id,
+//             'statusCode',
+//             resendEmail[0].statusCode,
+//           );
+//         }
+//       };
+
+//       if (emailRow !== undefined) {
+//         for (let i = 0; i < emailRow.length; i++) {
+//           const {
+//             id,
+//             receiver: rec,
+//             subject: subj,
+//             message: mes,
+//             statusCode,
+//           } = emailRow[i];
+
+//           if (statusCode === 500 || statusCode === 503 || statusCode === 429) {
+//             runResend(id, rec, subj, mes);
+//           }
+//         }
+//       }
+//     }, 60000);
+
+//     if (triggerEmail[0] !== undefined) {
+//       const scode = triggerEmail[0].statusCode;
+//       const emailID = triggerEmail[0].headers['x-message-id'];
+
+//       const emData = {
+//         clientID: res.locals.clientID,
+//         dhost: res.locals.dhost,
+//         sender,
+//         receiver,
+//         subject,
+//         body,
+//         emailID,
+//         tempID: tempID || 'dft',
+//         scode,
+//       };
+
+//       const saveEmail = await emailUtility.saveEmail(emData);
+//       if (saveEmail) {
+//         res.type('application/json');
+//         return res.status(201).json(saveEmail);
+//       }
+//     }
+//   }
+
+//   return true;
+// };
 
 const singleMailGET = async (req, res) => {
   const emailID = req.params.id;
@@ -218,7 +322,8 @@ const senderVerificationGetEmail = async (req, res) => {
 
 module.exports = {
   mailGET,
-  mailPOST,
+  // mailPOST,
+  awsmailPOST,
   singleMailGET,
   mailByRecepient,
   mailByClient,
