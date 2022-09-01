@@ -14,10 +14,9 @@ module.exports = {
 
   cryptoKey: process.env.CRYPTO_KEY || 'pWJP6kqmtQWjRRIqLc7pcxs01lwHzsr6',
 
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'AKIA2OYEWI47LI6I65UJ',
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey:
-    process.env.AWS_SECRET_ACCESS_KEY ||
-    'eXe3VGF1s5rJM+IgPGB5qFR84l6qBwQ6QOLfimJJ',
+    process.env.AWS_SECRET_ACCESS_KEY,
   // end of the module export bracket
 };
 
