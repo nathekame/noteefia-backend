@@ -24,26 +24,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public/uploads')));
-// app.use((req, res, next) => {
-//   // res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
-//   res.setHeader('Access-Control-Allow-Origin', '*');
-//   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT');
-//   res.setHeader('Access-Control-Allow-Credentials', 'true');
-//   res.setHeader(
-//     'Access-Control-Allow-Headers',
-//     'Authorization, Origin, Content-Type, Accept',
-//   );
-
-//   res.setHeader(
-//     'X-Requested-With,, Accept-Language Access-Control-Request-Method, Access-Control-Request-Headers',
-//   );
-
-//   next();
-// });
-
 
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader(

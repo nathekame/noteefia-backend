@@ -12,6 +12,9 @@
 # production
 /build
 
+# static
+/public/uploads
+
 # misc
 .DS_Store
 *.pem

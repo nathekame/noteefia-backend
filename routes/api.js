@@ -141,6 +141,8 @@ const uploadFile = multer({
   fileFilter: singleFileFilter,
 });
 
+router.get('/', authRoute.homeGET);
+
 router.post('/login', authRoute.loginPOST);
 
 router.post('/register', authRoute.registerPOST);
@@ -159,7 +161,7 @@ router.post(
 
 router.get('/verification_email', emailRoute.verificationGetEmail);
 
-router.get('/sender_verification_email', emailRoute.senderVerificationGetEmail);
+// router.get('/sender_verification_email', emailRoute.senderVerificationGetEmail);
 
 router.post('/verification_link', emailRoute.verificationLinkEmail);
 

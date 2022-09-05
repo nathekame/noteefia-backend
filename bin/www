@@ -3,14 +3,21 @@
 /**
  * Module dependencies.
  */
-const http = require('http');
-const debug = require('debug')('notifia-backend:server');
+// const http = require('http');
+const https = require('https');
+const fs = require('fs');
+const debug = require('debug')('noteefia-backend:server');
 const app = require('../app');
 const config = require('../config/secret');
 
+const options = {
+  key: fs.readFileSync('/etc/ssl/private.key'),
+  cert: fs.readFileSync('/etc/ssl/nt_certificate.crt'),
+};
+
 /**
-  * Normalize a port into a number, string, or false.
-  */
+ * Normalize a port into a number, string, or false.
+ */
 
 function normalizePort(val) {
   const port = parseInt(val, 10);
@@ -29,23 +36,24 @@ function normalizePort(val) {
 }
 
 /**
-  * Get port from environment and store in Express.
-  */
+ * Get port from environment and store in Express.
+ */
 
-// const port = normalizePort(config.nodePort);
-const port = normalizePort(5000);
+const port = normalizePort(config.nodePort);
+// const port = normalizePort(5000);
 
 app.set('port', port);
 
 /**
-  * Create HTTP server.
-  */
+ * Create HTTP server.
+ */
 
-const server = http.createServer(app);
+// const server = http.createServer(app);
+const server = https.createServer(options, app);
 
 /**
-  * Event listener for HTTP server "error" event.
-  */
+ * Event listener for HTTP server "error" event.
+ */
 
 function onError(error) {
   if (error.syscall !== 'listen') {
@@ -70,8 +78,8 @@ function onError(error) {
 }
 
 /**
-  * Event listener for HTTP server "listening" event.
-  */
+ * Event listener for HTTP server "listening" event.
+ */
 
 function onListening() {
   const addr = server.address();
@@ -80,8 +88,8 @@ function onListening() {
 }
 
 /**
-  * Listen on provided port, on all network interfaces.
-  */
+ * Listen on provided port, on all network interfaces.
+ */
 
 server.listen(port);
 server.on('error', onError);

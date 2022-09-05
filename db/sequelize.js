@@ -11,17 +11,23 @@ const clientsModel = require('./models/clients');
 
 const config = require('../config/secret');
 
-const sequelize = new Sequelize('notifiadb', config.dbUser, config.dbPassword, {
-  host: 'localhost',
-  dialect: 'mariadb',
+const sequelize = new Sequelize(
+  config.dbName,
+  config.dbUser,
+  config.dbPassword,
+  {
+    host: 'localhost',
+    dialect: 'mariadb',
+    logging: false,
 
-  pool: {
-    max: 5,
-    min: 0,
-    acquire: 30000,
-    idle: 10000,
-  },
-});
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 30000,
+      idle: 10000,
+    },
+  }
+);
 
 sequelize
   .authenticate()
@@ -42,7 +48,7 @@ const Clients = clientsModel(sequelize, Sequelize);
 
 sequelize.sync({ force: false }).then(() => {
   // console.clear();
-  // console.log('Database & tables created Successfully!');
+  console.log('Database & tables created Successfully!');
 });
 
 module.exports = {
