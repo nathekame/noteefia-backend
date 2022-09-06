@@ -190,17 +190,22 @@ const verificationGetEmail = async (req, res) => {
 
   const tokenFind = await userUtility.getUserToken(id);
 
+  // console.log('the tokenFID === > ' + JSON.stringify(tokenFind));
+
   if (tokenFind === token) {
     const key = 'isConfirmed';
     const val = 1;
     const updateVerified = await userUtility.updateUser(id, key, val);
+
+    // console.log('the verified update ===> ' + JSON.stringify(updateVerified));
+
     if (updateVerified) {
-      res.redirect(config.baseUrl);
+      res.redirect(config.frontendUrl);
     }
   }
 
   if (!tokenFind) {
-    res.redirect(config.baseUrl);
+    res.redirect(config.frontendUrl);
   }
 
   return null;

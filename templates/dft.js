@@ -3,7 +3,7 @@
 const dftTemplate = async (data) => {
 
 // console.log('the BODY DETAIS ===> ' + JSON.stringify(data));
-  // const baseUrl = `${config.baseUrl}:${config.nodePort}`;
+  // const frontendUrl = `${config.frontendUrl}:${config.nodePort}`;
   const body = ` <body leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" offset="0" style="margin: 0pt auto; padding: 0px; background:#f6f6f6;">
   <table id="main" width="100%" height="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f6f6f6">
     <tbody>

@@ -5,13 +5,16 @@ const sequelize = require('../db/sequelize');
 
 const userUtility = require('./userUtility');
 
+const dftTemplate = require('../templates/dft');
+
 const { hostEmail } = config;
 
-// const hostUrl = process.env.HOST_URL;
+// const backendUrl = process.env.BACKEND_URL;
 
-const hostUrl = 'https://54.227.65.41';
+// const backendUrl = 'https://3.216.111.17';
+const backendUrl = 'http://localhost:5000';
 
-const hostUrlclient = 'https://noteefia.com';
+const frontendUrl = 'https://noteefia.com';
 
 const SES_CONFIG = {
   accessKeyId: config.accessKeyId,
@@ -63,7 +66,7 @@ const awssendEmail = async (res, data) => {
       Body: {
         Html: {
           Charset: 'UTF-8',
-          Data: data.body,
+          Data: await dftTemplate(data.body),
         },
       },
       Subject: {
@@ -112,7 +115,7 @@ const awsresendEmail = async (to, subject, body) => {
       Body: {
         Html: {
           Charset: 'UTF-8',
-          Data: body,
+          Data: await dftTemplate(body),
         },
       },
       Subject: {
@@ -286,7 +289,7 @@ const sendVerificationEmail = async (uid) => {
     const createToken = await userUtility.updateUser(uid, key, token);
 
     if (createToken) {
-      const body = `Click on this <a href="${hostUrl}/api/verification_email?id=${uid}&token=${token}">Link</a> to verify your email`;
+      const body = `Click on this <a href="${backendUrl}/api/verification_email?id=${uid}&token=${token}">Link</a> to verify your email`;
       const params = {
         Source: hostEmail,
         Destination: {
@@ -297,7 +300,7 @@ const sendVerificationEmail = async (uid) => {
           Body: {
             Html: {
               Charset: 'UTF-8',
-              Data: body,
+              Data: await dftTemplate(body),
             },
           },
           Subject: {
@@ -341,7 +344,7 @@ const sendPasswordResetEmail = async (uid) => {
   const userEmail = userDetails.email;
   const subject = 'Noteefia Password Reset Email';
 
-  const body = `Click on this <a href="${hostUrlclient}/passwordreset/${uid}">Link</a> to reset your password`;
+  const body = `Click on this <a href="${frontendUrl}/passwordreset/${uid}">Link</a> to reset your password`;
   const params = {
     Source: hostEmail,
     Destination: {
@@ -352,7 +355,7 @@ const sendPasswordResetEmail = async (uid) => {
       Body: {
         Html: {
           Charset: 'UTF-8',
-          Data: body,
+          Data: await dftTemplate(body),
         },
       },
       Subject: {
@@ -403,7 +406,7 @@ const sendVerificationAndPasswordEmail = async (uid, password) => {
     if (createToken) {
       const body = ` Welcome to Noteefia Portal, Your Password Is ${password} ,
       
-      Click on this <a href="${hostUrl}/api/verification_email?id=${uid}&token=${token}">Link</a> to verify your email and update you password`;
+      Click on this <a href="${backendUrl}/api/verification_email?id=${uid}&token=${token}">Link</a> to verify your email and update you password`;
 
       const params = {
         Source: hostEmail,
@@ -415,7 +418,7 @@ const sendVerificationAndPasswordEmail = async (uid, password) => {
           Body: {
             Html: {
               Charset: 'UTF-8',
-              Data: body,
+              Data: await dftTemplate(body),
             },
           },
           Subject: {

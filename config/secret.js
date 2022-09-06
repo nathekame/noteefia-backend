@@ -1,8 +1,8 @@
 module.exports = {
-  baseUrl: process.env.BASE_URL || 'https://3.216.111.17',
-  // baseUrl: process.env.BASE_URL || 'http://localhost:5000',
+  frontendUrl: process.env.FRONTEND_URL || 'https://noteefia.com/',
   hostEmail: process.env.HOST_EMAIL,
   dbName: 'noteefiadb',
+  // dbName: 'notifiadb',
   dbUser: process.env.DB_USER,
   dbPassword: process.env.DB_PASSWORD,
   nodePort: process.env.NODE_PORT,

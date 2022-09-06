@@ -174,12 +174,14 @@ const registerPOST = async (req, res, next) => {
   if (outcome) {
     const sendVEmail = await emailUtility.sendVerificationEmail(uID);
 
-    if (sendVEmail) {
+    // console.log('the output of the email ent ===>> ' + JSON.stringify(sendVEmail));
+
+    if (!sendVEmail.isErr) {
       res.type('application/json');
       return res.status(201).json('Account Created Successfully');
     }
 
-    if (!sendVEmail) {
+    if (sendVEmail.isErr) {
       res.type('application/json');
       return res.status(504).json('An Error Occurred');
     }
