@@ -10,10 +10,10 @@ const debug = require('debug')('noteefia-backend:server');
 const app = require('../app');
 const config = require('../config/secret');
 
-const options = {
-  key: fs.readFileSync('/etc/ssl/private.key'),
-  cert: fs.readFileSync('/etc/ssl/nt_certificate.crt'),
-};
+// const options = {
+//   key: fs.readFileSync('/etc/ssl/private.key'),
+//   cert: fs.readFileSync('/etc/ssl/nt_certificate.crt'),
+// };
 
 /**
  * Normalize a port into a number, string, or false.
@@ -48,8 +48,8 @@ app.set('port', port);
  * Create HTTP server.
  */
 
-// const server = http.createServer(app);
-const server = https.createServer(options, app);
+const server = http.createServer(app);
+// const server = https.createServer(options, app);
 
 /**
  * Event listener for HTTP server "error" event.

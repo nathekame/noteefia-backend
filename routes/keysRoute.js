@@ -4,7 +4,7 @@ const keysUtility = require('../utility/keysUtility');
 const keyzGen = async () => {
   const alpha = 'abcdefghABCDEFGHIJKLijklmnopqrstuvwxyzMNOPQRSTUVWXYZ';
   const numbers = '0123456789';
-  const symbols = '!@#$%^&*_+-=';
+  const symbols = '!@#$%^&*_+';
 
   const chars = alpha + numbers + symbols;
 

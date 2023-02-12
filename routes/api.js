@@ -19,6 +19,8 @@ const keysRoute = require('./keysRoute');
 
 const clientsRoute = require('./clientsRoute');
 
+const smsRoute = require('./smsRoute');
+
 const config = require('../config/secret');
 
 const isAuthenticated = (req, res, next) => {
@@ -65,10 +67,9 @@ const isKeyValid = async (req, res, next) => {
         return res
           .status(200)
           .json(
-            'Sorry This Client Has Been Deactivated, Please Contact Support '
+            'Sorry This Client Has Been Deactivated, Please Contact Support ',
           );
       }
-
 
       const dbKey = getDKey.key;
 
@@ -83,13 +84,10 @@ const isKeyValid = async (req, res, next) => {
       if (!keyCheck(dbKey, apikey)) {
         res.sendStatus(403);
       }
-  
     } else {
-
       res.sendStatus(403);
     }
   } else {
-
     res.sendStatus(403);
   }
 };
@@ -121,9 +119,9 @@ const storage = multer.diskStorage({
 const singleFileFilter = async (req, file, cb) => {
   if (file.fieldname === 'profileImage') {
     if (
-      file.mimetype === 'image/jpg'
-      || file.mimetype === 'image/jpeg'
-      || file.mimetype === 'image/png'
+      file.mimetype === 'image/jpg' ||
+      file.mimetype === 'image/jpeg' ||
+      file.mimetype === 'image/png'
     ) {
       cb(null, true);
     } else {
@@ -156,7 +154,7 @@ router.post('/passwordreset', passwordRoute.passwordResetPostRoute);
 router.post(
   '/passwordupdate',
   isAuthenticated,
-  passwordRoute.passwordUpdateRoute,
+  passwordRoute.passwordUpdateRoute
 );
 
 router.get('/verification_email', emailRoute.verificationGetEmail);
@@ -177,7 +175,7 @@ router.post('/fileupload/:name', profileImageUpload, fileRoute.filePOST);
 router.post(
   '/key-generate/:clientID',
   isAuthenticated,
-  keysRoute.keyGENERATEFORCLIENT
+  keysRoute.keyGENERATEFORCLIENT,
 );
 
 router.post('/key-regenerate', isAuthenticated, keysRoute.keyREGENERATE);
@@ -193,14 +191,14 @@ router.get('/clients', isAuthenticated, clientsRoute.clientsGET);
 router.get(
   '/clients/:clientID',
   isAuthenticated,
-  clientsRoute.clientsGETWITHID
+  clientsRoute.clientsGETWITHID,
 );
 
 router.get('/emails', isAuthenticated, emailRoute.mailGET);
 
 router.post('/email', isKeyValid, emailRoute.awsmailPOST);
 
-// router.post('/sms', isAuthenticated, smsRoute.smsPOST);
+router.post('/sms', isAuthenticated, smsRoute.smsPOST);
 
 // router.get('/sms', isAuthenticated, smsRoute.smsGET);
 
