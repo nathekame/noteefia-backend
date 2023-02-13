@@ -198,9 +198,11 @@ router.get('/emails', isAuthenticated, emailRoute.mailGET);
 
 router.post('/email', isKeyValid, emailRoute.awsmailPOST);
 
-router.post('/sms', isAuthenticated, smsRoute.smsPOST);
+// router.post('/sms', isAuthenticated, smsRoute.smsPOST);
+router.post('/sms', isKeyValid, smsRoute.smsPOST);
+// router.post('/sms', smsRoute.smsPOST);
 
-// router.get('/sms', isAuthenticated, smsRoute.smsGET);
+router.get('/sms', isAuthenticated, smsRoute.smsGET);
 
 // router.get('/sms/:id', isAuthenticated, smsRoute.singleSmsGET);
 

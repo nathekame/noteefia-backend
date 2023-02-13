@@ -5,7 +5,7 @@ module.exports = (sequelize, type) => {
       primaryKey: true,
       autoIncrement: true,
     },
-    clientID: {
+    keyID: {
       type: type.STRING,
       notEmpty: true,
     },
@@ -18,19 +18,11 @@ module.exports = (sequelize, type) => {
       type: type.STRING,
       notEmpty: true,
     },
-    messageParts: {
-      type: type.INTEGER,
-      notEmpty: true,
-    },
     message: {
       type: type.TEXT,
       notEmpty: true,
     },
-    cost: {
-      type: type.TEXT,
-      notEmpty: true,
-    },
-    status: {
+    eventStatus: {
       type: type.TEXT,
       notEmpty: true,
     },

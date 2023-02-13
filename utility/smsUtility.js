@@ -9,9 +9,15 @@ const sequelize = require('../db/sequelize');
 // const dftTemplate = require('../smstemplates/dft');
 const config = require('../config/secret');
 
+// const credentials = {
+//   apiKey: 'b34064b8f8a2a4f4b589b24ca9cd0c429f12b633bbb92ad74cb2d1d685ab24ba',
+//   username: 'nbabroadcast',
+//   // format: 'json',
+// };
+
 const credentials = {
-  apiKey: 'b34064b8f8a2a4f4b589b24ca9cd0c429f12b633bbb92ad74cb2d1d685ab24ba',
-  username: 'nbabroadcast',
+  apiKey: '617d112d5f497c69dc89b977292100de3a1265106704e92a9035aee624ad1750',
+  username: 'noteefia',
   // format: 'json',
 };
 
@@ -19,39 +25,39 @@ const Africastalking = require('africastalking')(credentials);
 
 const sms = Africastalking.SMS;
 
-const sendSMS = async (res, tempID, data) => {
+const sendSMS = async (recepient, msg) => {
   let getTemplate;
 
-  switch (tempID) {
-    case 'vpr':
-      getTemplate = await vprTemplate(data.params);
-      break;
-    case 'vrc':
-      getTemplate = await vrcTemplate(data.params);
-      break;
-    case 'rim':
-      getTemplate = await rimTemplate(data.params);
-      break;
-    case 'rcn':
-      getTemplate = await rcnTemplate(data.params);
-      break;
-    case 'ucn':
-      getTemplate = await ucnTemplate(data.params);
-      break;
-    case 'tcn':
-      getTemplate = await tcnTemplate(data.params);
-      break;
-    case 'dft':
-      getTemplate = await dftTemplate(data.params);
-      break;
-    default:
-      res.type('application/json');
-      return res.status(404).json({ msg: 'Template Not Found' });
-  }
+  //   switch (tempID) {
+  //     case 'vpr':
+  //       getTemplate = await vprTemplate(data.params);
+  //       break;
+  //     case 'vrc':
+  //       getTemplate = await vrcTemplate(data.params);
+  //       break;
+  //     case 'rim':
+  //       getTemplate = await rimTemplate(data.params);
+  //       break;
+  //     case 'rcn':
+  //       getTemplate = await rcnTemplate(data.params);
+  //       break;
+  //     case 'ucn':
+  //       getTemplate = await ucnTemplate(data.params);
+  //       break;
+  //     case 'tcn':
+  //       getTemplate = await tcnTemplate(data.params);
+  //       break;
+  //     case 'dft':
+  //       getTemplate = await dftTemplate(data.params);
+  //       break;
+  //     default:
+  //       res.type('application/json');
+  //       return res.status(404).json({ msg: 'Template Not Found' });
+  //   }
 
   const options = {
-    to: data.receiver,
-    message: getTemplate,
+    to: recepient,
+    message: msg,
     enqueue: true,
   };
 
@@ -59,11 +65,14 @@ const sendSMS = async (res, tempID, data) => {
     .send(options)
     .then((response) => {
       const resp = response;
+      console.log(`THE RESP ==> ${JSON.stringify(resp)}`);
+
       return resp;
     })
     .catch((error) => {
       if (error) {
         const er = error;
+        console.log(`THE ERROR ==> ${JSON.stringify(er)}`);
         return er;
       }
       return false;
@@ -74,43 +83,43 @@ const sendSMS = async (res, tempID, data) => {
 };
 
 const saveSMS = async (smData) => {
-  let getTemplate;
+  // let getTemplate;
 
-  switch (smData.tempID) {
-    case 'vpr':
-      getTemplate = await vprTemplate(smData.params);
-      break;
-    case 'vrc':
-      getTemplate = await vrcTemplate(smData.params);
-      break;
-    case 'rim':
-      getTemplate = await rimTemplate(smData.params);
-      break;
-    case 'rcn':
-      getTemplate = await rcnTemplate(smData.params);
-      break;
-    case 'ucn':
-      getTemplate = await ucnTemplate(smData.params);
-      break;
-    case 'tcn':
-      getTemplate = await tcnTemplate(smData.params);
-      break;
-    case 'dft':
-      getTemplate = await dftTemplate(smData.params);
-      break;
-    default:
-      return true;
-  }
+  // switch (smData.tempID) {
+  //   case 'vpr':
+  //     getTemplate = await vprTemplate(smData.params);
+  //     break;
+  //   case 'vrc':
+  //     getTemplate = await vrcTemplate(smData.params);
+  //     break;
+  //   case 'rim':
+  //     getTemplate = await rimTemplate(smData.params);
+  //     break;
+  //   case 'rcn':
+  //     getTemplate = await rcnTemplate(smData.params);
+  //     break;
+  //   case 'ucn':
+  //     getTemplate = await ucnTemplate(smData.params);
+  //     break;
+  //   case 'tcn':
+  //     getTemplate = await tcnTemplate(smData.params);
+  //     break;
+  //   case 'dft':
+  //     getTemplate = await dftTemplate(smData.params);
+  //     break;
+  //   default:
+  //     return true;
+  // }
 
-  const data = {
-    clientID: smData.clientID,
-    receiver: smData.receiver,
-    messageId: smData.messageId,
-    message: getTemplate,
-    statusCode: smData.scode,
-  };
+  // const data = {
+  //   clientID: smData.clientID,
+  //   receiver: smData.receiver,
+  //   messageId: smData.messageId,
+  //   message: getTemplate,
+  //   statusCode: smData.scode,
+  // };
 
-  const nSms = sequelize.Sms.create(data)
+  const nSms = sequelize.Sms.create(smData)
     .then((newSms) => {
       if (!newSms) {
         return false;
@@ -130,7 +139,9 @@ const saveSMS = async (smData) => {
 };
 
 const getAllSms = async () => {
-  const { rows, count } = await sequelize.Sms.findAndCountAll()
+  const { rows, count } = await sequelize.Sms.findAndCountAll({
+    order: [['createdAt', 'DESC']],
+  })
     .then((dsms) => {
       if (!dsms) {
         return false;
@@ -168,6 +179,7 @@ const getSms = async (id) => {
 const getSmsWithClientID = async (clientID) => {
   const { rows, count } = await sequelize.Sms.findAndCountAll({
     where: { clientID },
+    order: [['createdAt', 'DESC']],
   })
     .then((Sms) => {
       if (!Sms) {
@@ -190,6 +202,7 @@ const getSmsWithClientID = async (clientID) => {
 const getSmsWithRecepient = async (receiver) => {
   const { rows, count } = await sequelize.Sms.findAndCountAll({
     where: { receiver },
+    order: [['createdAt', 'DESC']],
   })
     .then((Sms) => {
       if (!Sms) {

@@ -152,7 +152,9 @@ const awsresendEmail = async (to, subject, body) => {
   return sendPromise;
 };
 const getAllEmails = async () => {
-  const { rows, count } = await sequelize.Emails.findAndCountAll()
+  const { rows, count } = await sequelize.Emails.findAndCountAll({
+    order: [['createdAt', 'DESC']],
+  })
     .then((emails) => {
       if (!emails) {
         return false;
@@ -190,6 +192,7 @@ const getEmail = async (id) => {
 const getEmailWithRecepient = async (receiver) => {
   const { rows, count } = await sequelize.Emails.findAndCountAll({
     where: { receiver },
+    order: [['createdAt', 'DESC']],
   })
     .then((emails) => {
       if (!emails) {
@@ -212,6 +215,7 @@ const getEmailWithRecepient = async (receiver) => {
 const getEmailWithclientID = async (clientID) => {
   const { rows, count } = await sequelize.Emails.findAndCountAll({
     where: { clientID },
+    order: [['createdAt', 'DESC']],
   })
     .then((emails) => {
       if (!emails) {
