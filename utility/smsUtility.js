@@ -140,6 +140,7 @@ const saveSMS = async (smData) => {
 
 const getAllSms = async () => {
   const { rows, count } = await sequelize.Sms.findAndCountAll({
+    raw: true,
     order: [['createdAt', 'DESC']],
   })
     .then((dsms) => {

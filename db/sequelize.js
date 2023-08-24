@@ -4,7 +4,7 @@ const Sequelize = require('sequelize');
 const userModel = require('./models/users');
 const usermetaModel = require('./models/usermeta');
 const emailModel = require('./models/emails');
-const smsModel = require('./models/sms');
+const smsModel = require('./models/smsBK');
 const apiKeysModel = require('./models/apikeys');
 
 const clientsModel = require('./models/clients');
@@ -12,7 +12,7 @@ const clientsModel = require('./models/clients');
 const config = require('../config/secret');
 
 const sequelize = new Sequelize(
-  config.dbName,
+  config.database,
   config.dbUser,
   config.dbPassword,
   {

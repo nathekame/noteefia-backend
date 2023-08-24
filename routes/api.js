@@ -21,6 +21,8 @@ const clientsRoute = require('./clientsRoute');
 
 const smsRoute = require('./smsRoute');
 
+const imageRoute = require('./imageRoute');
+
 const config = require('../config/secret');
 
 const isAuthenticated = (req, res, next) => {
@@ -67,7 +69,7 @@ const isKeyValid = async (req, res, next) => {
         return res
           .status(200)
           .json(
-            'Sorry This Client Has Been Deactivated, Please Contact Support ',
+            'Sorry This Client Has Been Deactivated, Please Contact Support '
           );
       }
 
@@ -119,9 +121,9 @@ const storage = multer.diskStorage({
 const singleFileFilter = async (req, file, cb) => {
   if (file.fieldname === 'profileImage') {
     if (
-      file.mimetype === 'image/jpg' ||
-      file.mimetype === 'image/jpeg' ||
-      file.mimetype === 'image/png'
+      file.mimetype === 'image/jpg'
+      || file.mimetype === 'image/jpeg'
+      || file.mimetype === 'image/png'
     ) {
       cb(null, true);
     } else {
@@ -138,6 +140,11 @@ const uploadFile = multer({
   storage,
   fileFilter: singleFileFilter,
 });
+// Configure multer storage settings
+const strage = multer.memoryStorage();
+
+// Create a multer instance with the configured storage settings
+const upload = multer({ strage });
 
 router.get('/', authRoute.homeGET);
 
@@ -154,7 +161,7 @@ router.post('/passwordreset', passwordRoute.passwordResetPostRoute);
 router.post(
   '/passwordupdate',
   isAuthenticated,
-  passwordRoute.passwordUpdateRoute
+  passwordRoute.passwordUpdateRoute,
 );
 
 router.get('/verification_email', emailRoute.verificationGetEmail);
@@ -175,7 +182,7 @@ router.post('/fileupload/:name', profileImageUpload, fileRoute.filePOST);
 router.post(
   '/key-generate/:clientID',
   isAuthenticated,
-  keysRoute.keyGENERATEFORCLIENT,
+  keysRoute.keyGENERATEFORCLIENT
 );
 
 router.post('/key-regenerate', isAuthenticated, keysRoute.keyREGENERATE);
@@ -191,7 +198,7 @@ router.get('/clients', isAuthenticated, clientsRoute.clientsGET);
 router.get(
   '/clients/:clientID',
   isAuthenticated,
-  clientsRoute.clientsGETWITHID,
+  clientsRoute.clientsGETWITHID
 );
 
 router.get('/emails', isAuthenticated, emailRoute.mailGET);
@@ -203,6 +210,13 @@ router.post('/sms', isKeyValid, smsRoute.smsPOST);
 // router.post('/sms', smsRoute.smsPOST);
 
 router.get('/sms', isAuthenticated, smsRoute.smsGET);
+
+router.post(
+  '/facedetect',
+  upload.single('proImage'),
+  isAuthenticated,
+  imageRoute.facePOST,
+);
 
 // router.get('/sms/:id', isAuthenticated, smsRoute.singleSmsGET);
 

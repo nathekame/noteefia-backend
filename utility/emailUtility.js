@@ -66,7 +66,8 @@ const awssendEmail = async (res, data) => {
       Body: {
         Html: {
           Charset: 'UTF-8',
-          Data: await dftTemplate(data.body),
+          // Data: await dftTemplate(data.body),
+          Data: data.body,
         },
       },
       Subject: {
@@ -115,7 +116,8 @@ const awsresendEmail = async (to, subject, body) => {
       Body: {
         Html: {
           Charset: 'UTF-8',
-          Data: await dftTemplate(body),
+          // Data: await dftTemplate(body),
+          Data: body,
         },
       },
       Subject: {

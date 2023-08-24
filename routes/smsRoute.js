@@ -23,9 +23,14 @@ const smsGET = async (req, res) => {
     newArr.push(newObj);
   }
 
-  if (!R.isEmpty(newArr)) {
+  const outputArr = {
+    count: dCount,
+    rows: !R.isEmpty(newArr) ? newArr : dArr,
+  };
+
+  if (getSMS) {
     res.type('application/json');
-    return res.status(201).json(newArr);
+    return res.status(201).json(outputArr);
   }
 
   return true;
